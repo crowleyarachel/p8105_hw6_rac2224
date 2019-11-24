@@ -1,0 +1,153 @@
+---
+title: "p8105_hw6_rac2224"
+author: "Rachel Crowley"
+date: "11/24/2019"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(rvest)
+
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  fig.width = 8,
+  fig.height = 6,
+  out.width = "90%"
+)
+
+options(ggplot2.continuous.colour = "viridis",
+        ggplot2.continuous.fill = "viridis"
+        )
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+set.seed(1)
+```
+
+## Problem 1
+
+Loading and cleaning the data for regression analysis 
+
+```{r}
+bwt_data = read_csv("data/birthweight.csv") %>%
+  rename(
+    baby_sex = babysex,
+    baby_head = bhead,
+    baby_length = blength,
+    birthweight = bwt,
+    delivery_weight = delwt,
+    family_income = fincome,
+    father_race = frace,
+    gestational_age = gaweeks,
+    malformations = malform,
+    menarche_age = menarche,
+    mother_height = mheight,
+    mother_age = momage, 
+    mother_race = mrace,
+    previous_low_birthweight = pnumlbw,
+    prior_small_for_gestational = pnumsga, 
+    pre_pregnancy_bmi = ppbmi,
+    pre_pregnancy_weight = ppwt,
+    smoking_during_pregnancy = smoken, 
+    pregnancy_weight_gain = wtgain
+  ) %>%
+  mutate(
+    baby_sex = as.factor(baby_sex),
+    father_race = as.factor(father_race),
+    malformations = as.factor(malformations),
+    mother_race = as.factor(mother_race) )%>%
+  mutate(
+    baby_sex = recode(baby_sex, '1' = 'Male', '2' = 'Female'),
+    father_race = recode(father_race, '1' = 'White', '2' = 'Black', '3' = 'Asian', '4' = 'Puerto Rican', '8' = 'Other', '9' = 'Unknown'),
+    malformations = recode(malformations, '0' = 'Absent', '1' = 'Present'),
+    mother_race = recode(mother_race, '1' = 'White', '2' = 'Black', '3' = 'Asian', '4' = 'Puerto Rican', '8' = 'Other')
+  ) %>%
+  mutate(
+    baby_sex = fct_infreq(baby_sex),
+    father_race = fct_infreq(father_race),
+    malformations = fct_infreq(malformations),
+    mother_race = fct_infreq(mother_race)
+  )
+ 
+colSums(is.na(bwt_data))
+
+```
+
+* baby_sex, mother_race, father_race, and malformations were converted from numeric to factor variables. There were no missing values across all variables in the dataset. 
+
+Building regression models 
+
+```{r}
+
+fit = lm(birthweight ~ smoking_during_pregnancy + mother_age + pre_pregnancy_bmi + gestational_age, data = bwt_data)
+
+summary(fit)$coef
+
+fit %>% 
+  broom::tidy() %>%
+   knitr::kable(digits = 3)
+
+bwt_data %>%
+  modelr::add_residuals(fit) %>%
+  modelr::add_predictions(fit) %>%
+  ggplot(aes(x = pred, y = resid)) + geom_point() + 
+  labs(
+    title = "Model residuals against fitted values for proposed regression model for birthweight",
+    y = "Residuals",
+    x = "Fitted Values",
+    caption = "Data from Birthweight.csv"
+  )
+    
+fit2 = lm(birthweight ~ baby_length + gestational_age, data = bwt_data)
+fit3 = lm(birthweight ~ baby_head*baby_length + baby_sex*baby_head + baby_sex*baby_length + baby_head*baby_length*baby_sex, data = bwt_data)
+
+summary(fit2)$coef
+
+fit2 %>% 
+  broom::tidy() %>%
+   knitr::kable(digits = 3)
+
+bwt_data %>%
+  modelr::add_residuals(fit2) %>%
+  modelr::add_predictions(fit2) %>%
+  ggplot(aes(x = pred, y = resid)) + geom_point() + 
+  labs(
+    title = "Model residuals against fitted values for regression model with baby length and gestational age",
+    y = "Residuals",
+    x = "Fitted Values",
+    caption = "Data from Birthweight.csv"
+  )
+
+summary(fit3)$coef
+
+fit3 %>% 
+  broom::tidy() %>%
+   knitr::kable(digits = 3)
+
+bwt_data %>%
+  modelr::add_residuals(fit3) %>%
+  modelr::add_predictions(fit3) %>%
+  ggplot(aes(x = pred, y = resid)) + geom_point() + 
+  labs(
+    title = "Model residuals against fitted values for regression model with head size, length, and sex interaction",
+    y = "Residuals",
+    x = "Fitted Values",
+    caption = "Data from Birthweight.csv"
+  )
+
+```
+
+* describe plots and process for model building 
+
+Comparing regression models
+
+```{r}
+
+
+
+```
