@@ -28,7 +28,7 @@ scale_fill_discrete = scale_fill_viridis_d
 
 theme_set(theme_minimal() + theme(legend.position = "bottom"))
 
-set.seed(1)
+set.seed(34565)
 ```
 
 ## Problem 1
@@ -159,7 +159,7 @@ bwt_data %>%
 
 ```
 
-*When modeling residuals against fitted values for regression model with head size, length, and sex interaction and for the regression model with interaction by baby's head size, length, and sex, the residuals are closer to the line where residuals equals zero (y=0), indicating less variance with these models compared to the proposed model above. These models still have reiduals that are far away from 0, thus variance is still moderately high with these models. The model with baby's head size, length, and sex appears to have the least variance of the three models, as residual values are closer to the line and fewer extreme values exist. 
+* When modeling residuals against fitted values for regression model with head size, length, and sex interaction and for the regression model with interaction by baby's head size, length, and sex, the residuals are closer to the line where residuals equals zero (y=0), indicating less variance with these models compared to the proposed model above. These models still have reiduals that are far away from 0, thus variance is still moderately high with these models. The model with baby's head size, length, and sex appears to have the least variance of the three models, as residual values are closer to the line and fewer extreme values exist. 
 
 Comparing regression models in terms of the cross-validated prediction error
 
@@ -197,4 +197,80 @@ cv_df
 
 * After plotting the prediction error distribution for each of the three models, the model with interaction by baby's head size, length, and sex has a higher density at the smallest values of root mean squared error and best fit compared to the other models. The proposed model has the highest root mean squared error values and worst fit, while the model with baby length and gestational age main effects has slightly worse fit than the model with interaction terms. 
 
-## 
+## Problem 2
+
+Understanding the distribution of r̂2 and log(β̂0∗β̂1) with simple linear regression and bootstrapping
+
+Simple linear regression with tmax as the response and tmin as the predictor, finding beta_0, beta_1, log(beta_0*beta_1), and r^2 estimates 
+
+
+```{r}
+weather_df = 
+  rnoaa::meteo_pull_monitors(
+    c("USW00094728"),
+    var = c("PRCP", "TMIN", "TMAX"), 
+    date_min = "2017-01-01",
+    date_max = "2017-12-31") %>%
+  mutate(
+    name = recode(id, USW00094728 = "CentralPark_NY"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) %>%
+  select(name, id, everything())
+
+boot_straps = weather_df %>%
+  bootstrap(n = 5000) %>%
+  mutate(
+  linear_models = map(strap, ~lm(tmax~tmin, data = .x)),
+  tidy_results = map(linear_models, broom::tidy),
+  glance_results = map(linear_models, broom::glance)
+  ) %>%
+  unnest(tidy_results, glance_results) %>%
+  select(estimate, term, r.squared) %>%
+  pivot_wider(
+    names_from = "term",
+    values_from = "estimate"
+  ) %>%
+  rename(
+    beta_0 = `(Intercept)`,
+    beta_1 = tmin,
+    r_squared = r.squared
+  ) %>%
+  select(r_squared, beta_0, beta_1) %>%
+  mutate(
+    log_beta0_x_beta1 = log(beta_0*beta_1)
+  )
+
+```
+
+Plotting the distribution of log(beta_0*beta_1) and r^2 estimates, calculating confidence intervals 
+
+```{r}
+
+boot_straps %>%
+    ggplot(aes(x = log_beta0_x_beta1)) + geom_density() + geom_vline(xintercept = 2.016) + labs(
+      title = "Distribution of log(beta0*beta1) estimates from a linear regression of tmax~tmin and 5000 bootstrap samples",
+      x = "log(beta0*beta1)",
+      caption = "Data from NOAA weather dataset"
+    )
+
+boot_straps %>%
+    ggplot(aes(x = r_squared)) + geom_density() + geom_vline(xintercept = .912) + labs(
+      title = "Distribution of r-squared estimates from a linear regression of tmax~tmin and 5000 bootstrap samples",
+      x = "R-squared",
+      caption = "Data from NOAA weather dataset"
+    )
+
+```
+
+Distribution of log(beta_0*beta_1)
+
+* The distribution of log(beta_0*beta_1) appears to have the form of a normal distribution, with the majority of points centered around a value of 2.016. 
+
+* The 95% confidence interval for log(beta0xbeta1) is `r round(quantile(pull(boot_straps, log_beta0_x_beta1), probs = c(.025, .975)), digits = 3)`, thus we are 95% confident that the true log(beta0xbeta1) lies between 1.965 and 2.058. 
+
+Distribution of r^2 estimates
+
+* The majority of r^2 estimates are centered around a r^2 value of .912 and the distribution appears approximately normal. The high density of values around .912 provides evidence that a large percent of the variation in tmax can be explained by tmin. 
+
+* The 95% confidence interval for the r_squared estimate is `r round(quantile(pull(boot_straps, r_squared), probs = c(.025, .975)), digits = 3)`, thus we are 95% confident that the true r_squared value lies between 0.893 and 0.927.
+ 
