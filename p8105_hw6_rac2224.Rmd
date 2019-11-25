@@ -102,7 +102,7 @@ bwt_data %>%
   modelr::add_residuals(fit) %>%
   modelr::add_predictions(fit) %>%
   ggplot(aes(x = pred, y = resid)) + geom_point() + 
-  geom_hline(aes(yintercept = 0, color = "red")) + 
+  geom_hline(aes(yintercept = 0)) + 
   labs(
     title = "Model residuals against fitted values for proposed regression model for birthweight",
     y = "Residuals",
@@ -110,7 +110,9 @@ bwt_data %>%
     caption = "Data from Birthweight.csv"
   )
 ```
- 
+
+*When modeling residuals against fitted values for the proposed regression model, the residuals are scattered far away from the line where residuals (y) equals 0, indicating high variance and difference between observed and predicted values with this model. 
+
 Fitting two other models 
  
 ```{r}
@@ -126,7 +128,7 @@ bwt_data %>%
   modelr::add_residuals(fit2) %>%
   modelr::add_predictions(fit2) %>%
   ggplot(aes(x = pred, y = resid)) + geom_point() + 
-  geom_hline(aes(yintercept = 0, color = "red")) + 
+  geom_hline(aes(yintercept = 0)) + 
   labs(
     title = "Model residuals against fitted values for regression model with baby length and gestational age",
     y = "Residuals",
@@ -147,9 +149,9 @@ bwt_data %>%
   modelr::add_residuals(fit3) %>%
   modelr::add_predictions(fit3) %>%
   ggplot(aes(x = pred, y = resid)) + geom_point() + 
-  geom_hline(aes(yintercept = 0, color = "red")) + 
+  geom_hline(aes(yintercept = 0)) + 
   labs(
-    title = "Model residuals against fitted values for regression model with head size, length, and sex interaction",
+    title = "Modeling residuals against fitted values for regression model with head size, length, and sex interaction",
     y = "Residuals",
     x = "Fitted Values",
     caption = "Data from Birthweight.csv"
@@ -157,7 +159,7 @@ bwt_data %>%
 
 ```
 
-* describe plots and process for model building 
+*When modeling residuals against fitted values for regression model with head size, length, and sex interaction and for the regression model with interaction by baby's head size, length, and sex, the residuals are closer to the line where residuals equals zero (y=0), indicating less variance with these models compared to the proposed model above. These models still have reiduals that are far away from 0, thus variance is still moderately high with these models. The model with baby's head size, length, and sex appears to have the least variance of the three models, as residual values are closer to the line and fewer extreme values exist. 
 
 Comparing regression models in terms of the cross-validated prediction error
 
@@ -192,3 +194,7 @@ cv_df =
   
 cv_df
 ```
+
+* After plotting the prediction error distribution for each of the three models, the model with interaction by baby's head size, length, and sex has a higher density at the smallest values of root mean squared error and best fit compared to the other models. The proposed model has the highest root mean squared error values and worst fit, while the model with baby length and gestational age main effects has slightly worse fit than the model with interaction terms. 
+
+## 
