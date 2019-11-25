@@ -84,7 +84,7 @@ colSums(is.na(bwt_data))
 
 Building regression models 
 
-* For the proposed regression model for birthweight, the following variables were included in the model as predictors, based on existing literature that support an associaton between these factors and birthweight:  average number of cigarettes smoked per day during pregnancy (smoking_during_pregnancy), mother's age at delivery in years (mother_age), mother’s pre-pregnancy BMI (pre_pregnancy_bmi), and gestational age in weeks (gestational_age). It is hypothesized that for a one unit increase in the average number of cigarettes smoked per day during pregnancy, birthweight will decrease; for an increase in age at delivery in years, birthweight will decrease; for a one unit increase in mother's pre-pregnancy BMI, birthweight will increase; for an increase in gestational age in weeks, birthweight will increase. 
+* For the proposed regression model for birthweight, the following variables were included in the model as predictors, based on existing literature that support an associaton between these factors and birthweight:  average number of cigarettes smoked per day during pregnancy (smoking_during_pregnancy), mother's age at delivery in years (mother_age), mother’s pre-pregnancy BMI (pre_pregnancy_bmi), and gestational age in weeks (gestational_age). It is hypothesized that for an one unit increase in the average number of cigarettes smoked per day during pregnancy, birthweight will decrease; for an increase in age at delivery in years, birthweight will decrease; for a one unit increase in mother's pre-pregnancy BMI, birthweight will increase; for an increase in gestational age in weeks, birthweight will increase. 
 
 Fitting the model and plot of model residuals against fitted value
 
@@ -104,7 +104,7 @@ bwt_data %>%
   ggplot(aes(x = pred, y = resid)) + geom_point() + 
   geom_hline(aes(yintercept = 0)) + 
   labs(
-    title = "Model residuals against fitted values for proposed regression model for birthweight",
+    title = "Modeling residuals for proposed regression model for birthweight",
     y = "Residuals",
     x = "Fitted Values",
     caption = "Data from Birthweight.csv"
@@ -113,7 +113,7 @@ bwt_data %>%
 
 *When modeling residuals against fitted values for the proposed regression model, the residuals are scattered far away from the line where residuals (y) equals 0, indicating high variance and difference between observed and predicted values with this model. 
 
-Fitting two other models 
+Fitting two other models: modeling residuals against fitted values 
  
 ```{r}
 fit2 = lm(birthweight ~ baby_length + gestational_age, data = bwt_data)
@@ -130,7 +130,7 @@ bwt_data %>%
   ggplot(aes(x = pred, y = resid)) + geom_point() + 
   geom_hline(aes(yintercept = 0)) + 
   labs(
-    title = "Model residuals against fitted values for regression model with baby length and gestational age",
+    title = "Modeling residuals for regression model with baby length and gestational age",
     y = "Residuals",
     x = "Fitted Values",
     caption = "Data from Birthweight.csv"
@@ -151,7 +151,7 @@ bwt_data %>%
   ggplot(aes(x = pred, y = resid)) + geom_point() + 
   geom_hline(aes(yintercept = 0)) + 
   labs(
-    title = "Modeling residuals against fitted values for regression model with head size, length, and sex interaction",
+    title = "Modeling residuals for regression model with head size, length, and sex interaction",
     y = "Residuals",
     x = "Fitted Values",
     caption = "Data from Birthweight.csv"
@@ -159,7 +159,7 @@ bwt_data %>%
 
 ```
 
-* When modeling residuals against fitted values for regression model with head size, length, and sex interaction and for the regression model with interaction by baby's head size, length, and sex, the residuals are closer to the line where residuals equals zero (y=0), indicating less variance with these models compared to the proposed model above. These models still have reiduals that are far away from 0, thus variance is still moderately high with these models. The model with baby's head size, length, and sex appears to have the least variance of the three models, as residual values are closer to the line and fewer extreme values exist. 
+* When modeling residuals against fitted values for the regression model with head size, length, and sex interaction and for the regression model with baby length and gestational age main effects, the residuals are closer to the line where residuals equals zero (y=0), indicating less variance with these models compared to the proposed model above. These models still have residuals that are far away from 0, thus variance is still moderately high with these models. The model with baby's head size, length, and sex interaction appears to have the least variance of the three models, as residual values are closer to the line and fewer extreme values exist. 
 
 Comparing regression models in terms of the cross-validated prediction error
 
@@ -248,14 +248,14 @@ Plotting the distribution of log(beta_0*beta_1) and r^2 estimates, calculating c
 
 boot_straps %>%
     ggplot(aes(x = log_beta0_x_beta1)) + geom_density() + geom_vline(xintercept = 2.016) + labs(
-      title = "Distribution of log(beta0*beta1) estimates from a linear regression of tmax~tmin and 5000 bootstrap samples",
+      title = "Distribution of log(beta0*beta1) estimates from 5000 bootstrap samples",
       x = "log(beta0*beta1)",
       caption = "Data from NOAA weather dataset"
     )
 
 boot_straps %>%
     ggplot(aes(x = r_squared)) + geom_density() + geom_vline(xintercept = .912) + labs(
-      title = "Distribution of r-squared estimates from a linear regression of tmax~tmin and 5000 bootstrap samples",
+      title = "Distribution of r-squared estimates from 5000 bootstrap samples",
       x = "R-squared",
       caption = "Data from NOAA weather dataset"
     )
